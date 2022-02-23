@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+  
+<div id="all" class="container">
+  <div class="row">
+    <div class="col s12">
+      <h1>Code Quiz</h1>
+      <a id="start" class="waves-effect waves-light btn">Start</a>
+    </div>
+    <div id="questOps" class="row hidden">
+    <div id="timer">30</div>
+    <div id="score"></div>
+    <div id="questionDiv" class="col s12 m6">Question</div>
+    <div id="optionDiv" class="col s12 m6">Options</div>
+    </div>
+
+  </div>
+  <div id="initials" class="row hidden">
+    <div class="input-field col s6">
+      <input id="newScore" type="text">
+      <label for="first_name">Initials</label>
+
+    </div>
+    <a id="submit" class="waves-effect waves-light btn">Submit</a>
+  </div>
+  <div id="scores"></div>
+</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script>
+
+    currentQuestion = 0
+    let score = 0
+    let timer = 30
+
+    let questions = [
+      {
+        question: 'what is one way of declaring a variable in JS?',
+        options: ['const', 'string'],
+        answer: 'const'
+      },
+      {
+        question: 'what is a true/false data type called?',
+        options: ['string', 'boolean'],
+        answer: 'boolean'
+      }
+    ]
+
+    const displayQuestion = () => {
+      document.getElementById("questionDiv").innerHTML = `
+      <p
+      >
+      ${questions[currentQuestion].question}
+      </p>
+      `
+      document.getElementById('optionDiv').innerHTML = `
+      <p
+      class="option"
+      data-option='${questions[currentQuestion].options[0]}'
+      data-answer='${questions[currentQuestion].answer}'
+      >
+      ${questions[currentQuestion].options[0]}
+      </p>
+      <p
+      class="option"
+      data-option='${questions[currentQuestion].options[1]}'
+      data-answer='${questions[currentQuestion].answer}'
+      >
+      ${questions[currentQuestion].options[1]}
+      </p>
+      `
+    }
+
+    const displayScore = () => {
+      document.getElementById("score").innerHTML = `
+      Score: ${score}
+      `
+    }
+
+    const quizFinished = () => {
+      displayScore()
+      clearInterval(myTimer)
+    console.log('quiz finished')
+    document.getElementById('questionDiv').innerHTML = ''
+    document.getElementById('optionDiv').innerHTML = ''
+    document.getElementById('initials').classList.remove('hidden')
+    
+    }
+
+    document.getElementById('submit').addEventListener('click', event => {
+      let newScore = {
+        time: timer,
+        initials: document.getElementById('newScore').value
+      }
+      console.log(newScore)
+      if(localStorage.getItem('scores')) {
+        let scores = JSON.parse(localStorage.getItem('scores'))
+        scores.push(newScore)
+        localStorage.setItem('scores', JSON.stringify(scores))
+      } else {
+        let scores = []
+        scores.push(newScore)
+        localStorage.setItem('scores', JSON.stringify(scores))
+      }
+      let scores = JSON.parse(localStorage.getItem('scores'))
+      scores.forEach(score=> {
+        document.getElementById('scores').innerHTML += `
+        ${score.initials}
+        ${score.time}
+        <hr> </hr>
+        `
+      })
+      
+    })
+
+    document.addEventListener("click", event => {
+      if(event.target.classList.contains('option')) {
+        // console.log(event.target.dataset.option)
+        // console.log(event.target.dataset.answer)
+        if(event.target.dataset.option== event.target.dataset.answer) {
+          console.log('you got it right!')
+          score += 1
+          currentQuestion += 1
+          if(currentQuestion == questions.length) {
+            quizFinished()
+          } else {
+          displayScore()
+          displayQuestion()
+          }
+        } else {
+          console.log('you got it wrong!')
+          timer -=5
+
+        }
+
+      }
+    })
+
+    const timerFunction = () => {
+      timer -= 1
+      document.getElementById('timer').innerHTML = `
+      ${timer}
+      `
+      if (timer < 0) {
+        document.getElementById('all').innerHTML = `
+        <h1> YOU LOSE! YOU GET NOTHING! </h1>
+        `
+      }
+    }
+
+
+    let myTimer 
+    document.getElementById("start").addEventListener('click', event => {
+      document.getElementById('start').classList.add('hidden')
+      document.getElementById('questOps').classList.remove('hidden')
+      displayScore()
+      myTimer = setInterval(timerFunction, 1000)
+      displayQuestion()
+    })
+
+
+  </script>
+</body>
+</html>
